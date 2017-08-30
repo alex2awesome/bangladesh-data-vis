@@ -1,0 +1,17 @@
+TODO:
+
+* Text
+* Clean up shapefiles
+* Embed on squarespace
+
+
+Wishlist:
+
+* Resize the route map (map-3.html)
+* Add rivers that are discussed in text (map-1.html)
+* have the map center before the scroll starts
+
+labels
+Brahmaputra
+Ganges
+Meghna

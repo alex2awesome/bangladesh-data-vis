@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <script data-require="d3@4.0.0" data-semver="4.0.0" src="https://d3js.org/d3.v4.min.js"></script>
+    <script data-require="topojson.min.js@3.0.0" data-semver="3.0.0" src="https://unpkg.com/topojson@3.0.0"></script>
+  </head>
+
+  <body>
+    <svg width="700" height="400"></svg>
+    <script>
+    var width = 700,
+      height = 400,
+      bboxes = [];
+
+    d3.queue()
+      .defer(d3.json, "https://unpkg.com/world-atlas@1/world/110m.json")
+      .await(ready);
+
+    //Map projection
+    var proj = d3.geoMercator()
+      .scale(100)
+      .center([-0.0018057527730242487, 11.258678472759552]) //projection center
+      .translate([width / 2, height / 2]) //translate to center the map in view
+
+    //Generate paths based on projection
+    var myPath = d3.geoPath().projection(proj);
+
+    var svg = d3.select("svg"),
+      width = +svg.attr("width"),
+      height = +svg.attr("height");
+
+    //Group for the map features
+    var map = svg.append("g")
+      .attr("class", "map");
+
+
+    function ready(error, geodata) {
+      
+      if (error) return console.log(error); //unknown error, check the console
+
+      //Create a path for each map feature in the data
+      map.selectAll("path")
+        .data(topojson.feature(geodata, geodata.objects.countries).features) //generate features from TopoJSON
+        .enter()
+        .append("path")
+        .attr("class", "country")
+        .attr("id", function(d) {
+          return d.id;
+        })
+        .attr("d", myPath);
+
+      bboxes = boundingExtent(
+        topojson.feature(geodata, geodata.objects.countries).features
+      );
+
+
+      svg.selectAll("rect")
+        .data(bboxes)
+        .enter()
+        .append("rect")
+        .attr("id", function(d) {
+          return d.id;
+        })
+        .attr("class", "bb")
+        .attr("x", function(d) {
+          return d.x;
+        })
+        .attr("y", function(d) {
+          return d.y;
+        })
+        .attr("width", function(d) {
+          return d.width;
+        })
+        .attr("height", function(d) {
+          return d.height;
+        })
+        .style("fill", "none")
+        .style("stroke", "steelblue");
+    }
+
+    function boundingExtent(features) {
+      var bounds = [];
+      for (var x in features) {
+        var boundObj = {};
+        thisBounds = myPath.bounds(features[x]);
+        boundObj.id = features[x].id;
+        boundObj.x = thisBounds[0][0];
+        boundObj.y = thisBounds[0][1];
+        boundObj.width = thisBounds[1][0] - thisBounds[0][0];
+        boundObj.height = thisBounds[1][1] - thisBounds[0][1];
+        boundObj.path = thisBounds;
+        bounds.push(boundObj)
+      }
+      return bounds;
+    }
+
+    function boundExtentBySvg() {
+      var countries = svg.selectAll(".country")
+      countries.each(function(d) {
+        var box = d3.select(this).node().getBBox();
+        bboxes.push({
+          id: d.id,
+          x: box.x,
+          y: box.y,
+          width: box.width,
+          height: box.height
+        })
+      })
+    }
+  </script>
+  </body>
+
+</html>

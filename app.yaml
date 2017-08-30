@@ -1,0 +1,14 @@
+service: bangladesh
+runtime: python27
+api_version: 1
+threadsafe: true
+ 
+handlers:
+- url: /(.*)
+  static_files: \1
+  upload: (.*)
+
+skip_files:
+- scratch/
+- map-files/scratch/
+- map-files/shpfiles/

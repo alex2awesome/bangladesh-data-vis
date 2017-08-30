@@ -1,0 +1,54 @@
+## deploy
+ gcloud auth login alex2awesome@gmail.com
+ gcloud config set project data-vis-projects
+ gcloud app deploy
+
+
+## shpfile => GeoJSON conversion
+
+ogr2ogr -f GeoJSON bangla_region.json shpfiles/bangla-shp-scratch/bangladesh-region-subunits.shp
+
+ogr2ogr -f GeoJSON -where "adm0_a3 IN ('BGD', 'IND')" bangla_country.json ne_10m_admin_0_countries.shp
+
+ogr2ogr -f GeoJSON bangla-places.json bangla-cities.shp
+
+ogr2ogr -f GeoJSON bangla_rivers.json ne_10m_rivers_lake_centerlines.shp
+
+
+## GeoJSON => topojson conversion
+
+topojson -o bangla-region.topo.json --id-property sov_a3 --properties name=name --properties rank=scalerank -- bangla_region.json 
+
+topojson -o bangla-places.topo.json --id-property SOV_A3 --properties name=NAME --properties rank=SCALERANK -- bangla_places.json 
+
+topojson -o bangla-country.topo.json --id-property sov_a3 --properties name=name --properties rank=scalerank -- bangla_country.json
+
+# flood risk (simplified)
+topojson -o bangla-flood-risk-small.topo.json --id-property THANANAME --properties flood_risk=FLOODCAT -- bangla_flood_risk.json
+
+# Shamshuddin's path
+https://www.google.com/maps/d/u/0/edit?mid=1QRIE5AoGhKui6vOdGLFBJHKXm7c&ll=22.78351728876023%2C90.64227106113276&z=11
+$ togeojson Shamshuddin's\ Path.kml.kml > shamshuddins_path.geojson
+$ topojson -o shamshuddins_path.topo.json --id-property name  -- shamshuddins_path_2.geojson 
+
+
+
+
+##########
+data
+
+### flooding data: 
+https://data.humdata.org/group/bgd
+https://data.humdata.org/dataset/bangladesh-hazards
+
+### possible migration data:
+http://www.sciencedirect.com/science/article/pii/S0959378016300140
+
+## rivers polygons
+https://geonode.wfp.org/layers/geonode:bgd_hyd_major_rivers_py
+
+## snapping 
+mapshaper -i ne_10_countries/bangla_country.json bangla_rivers_polygons/bangla_river_polygons_small.json snap snap-interval=.001 -o test.json format=geojson
+# in mapshaper.org
+clip bangla_country.json
+filter-islands min-vertices 10
