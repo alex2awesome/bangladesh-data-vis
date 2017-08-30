@@ -340,7 +340,7 @@ var scrollVis = function () {
           })
           .text(function(d, i) {  
             if (i == 0) { return 'Elisha Village' }
-            else if (i == 1) { return 'Donia'}
+            else if (i == 1) { return 'Donia Union'}
             else if (i == 4) { return 'Bhola Bosti' }
             else { return d.id }
           })
